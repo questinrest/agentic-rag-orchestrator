@@ -1,115 +1,89 @@
-# TierRAG - Multi-Tiered Retrieval-Augmented Generation System
+# Agentic RAG Pipeline
 
-## Brief Description
+A highly modular and efficient Retrieval-Augmented Generation (RAG) system built with **LangChain**, **Pinecone**, **MongoDB**, and **Groq for LLM inferencing**. This project focuses on intelligent routing, optimized context retrieval using Parent-Child chunking, semantic caching, and full observability.
 
-**TierRAG** is a modular, high-performance Retrieval-Augmented Generation (RAG) system built with **FastAPI**, **MongoDB Atlas**, and **Pinecone**. It is designed to handle user-authenticated document ingestion, multi-tier intelligent caching, and configurable chunking strategies.
+## Key Features
 
-Key capabilities include:
-- **Multi-Tier Caching:** Implements an in-memory 3-tier cache (Exact, Semantic, and Retrieval) to aggressively minimize latency and LLM API costs.
-- **Advanced Chunking:** Supports both simple Recursive Character chunking and relationship-preserving Parent-Child chunking.
-- **Document Versioning:** Automatically manages active vs. archived versions of documents in MongoDB so overlapping document uploads don't pollute the vector space.
-- **Namespace Isolation:** Enforces secure, per-user data isolation in Pinecone via JWT-based authentication.
-- **Reranking & Generation:** Utilizes cross-encoder reranking (`bge-reranker-v2-m3`) and Groq's high-speed inference API (`llama-3.3-70b-versatile`) for highly accurate context generation.
-- **Deep Observability:** Integrated with **LangSmith** to trace chunking, embedding, vector retrieval, and LLM generative logic at a granular level.
+- **Adaptive Routing**: Intelligently routes user queries to the appropriate handler (Vectorstore, Direct LLM, or Web Search) using a Groq-powered classifier (`adaptive_router.py`).
+- **Semantic Caching**: Implements an in-memory semantic cache using `sentence-transformers` (`all-MiniLM-L6-v2`). This avoids redundant embedding and LLM calls for semantically similar queries by returning cached answers based on a cosine similarity threshold.
+- **Advanced Chunking Strategy**: Supports `parent_child`. By utilizing Parent-Child mapping, the system retrieves narrow, highly relevant chunks (children) from Pinecone but feeds the LLM the broader context (parents) from MongoDB to maintain full semantic meaning without token bloat.
+- **High-Performance Vector Search & Reranking**: Uses Pinecone for vector storage and search, supporting cross-encoder reranking (`bge-reranker-v2-m3`) to surface the most relevant chunks.
+- **High-Speed Generation**: Integrates the blazing-fast Groq API (`openai/gpt-oss-120b` or similar) to generate final answers reliably with precise citations.
 
-For a deep dive into the system's architecture, flow diagrams, and design decisions, see the [Architecture Document](docs/architecture.md).
+## Architecture
 
----
+1. **Document Ingestion & Chunking (`src/chunking/parent_child.py`)**: Documents (PDF/TXT) are hashed, loaded, and split. If using Parent-Child chunking, larger parent chunks are stored in MongoDB while smaller child chunks are mapped to their parents.
+2. **Embedding & Upsert (`src/embedding/embed.py`)**: Text chunks are embedded and upserted into an isolated Pinecone namespace.
+3. **Query Routing (`src/adaptive_router.py`)**: A routing classifier evaluates the query to decide if it requires RAG, web search, or just general knowledge.
+4. **Caching (`src/caching/semantic_cache.py`)**: The query's embedding is checked against a semantic cache. On a hit, the cached answer is returned immediately.
+5. **Retrieval (`src/retrieval/reranker.py`, `retriever.py`)**: If a vector search is needed, queries are embedded and matched against Pinecone, with optional reranking.
+6. **Generation (`src/generation/generator.py`)**: Retrieved child chunks trigger a lookup of their corresponding parent chunks from MongoDB. The LLM aggregates this full context and generates a well-cited response.
 
 ## Setup Instructions
 
 ### 1. Prerequisites
-- Python 3.9+
-- A MongoDB Atlas cluster (or local MongoDB string)
-- A Pinecone account (API Key)
-- A Groq account (API Key for LLM generation)
+- Python 3.11+
+- A MongoDB Atlas cluster
+- Pinecone Account & API Key
+- Groq API Key
 
 ### 2. Clone the Repository
 ```bash
 git clone <your-repo-url>
-cd rag-project-2
+cd <repo-name>
 ```
 
-### 3. Virtual Environment & Dependencies
-Create and activate a virtual environment, then install the required Python packages:
+### 3. Create a Virtual Environment and Install Dependencies
 ```bash
 python -m venv .venv
-# On Windows:
+# Windows:
 .venv\Scripts\activate
-# On macOS/Linux:
+# macOS/Linux:
 source .venv/bin/activate
 
 pip install -r requirements.txt
 ```
 
-### 4. Environment Configuration
-Copy the `.env.example` file to create your own configuration file:
+### 4. Configuration
+Copy the sample exact configuration to `.env`:
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` and configure your credentials:
+Set up your `.env` variables:
 ```env
-# MongoDB Connection (Make sure to whitelist your IP in Atlas)
+# MongoDB Connection
 CONNECTION_STRING="mongodb+srv://<user>:<password>@cluster0...mongodb.net/"
-
-# Auth Configuration
-SECRET_KEY="your_secure_randomly_generated_jwt_secret"
-ALGORITHM="HS256"
 
 # Vector Database (Pinecone)
 PINECONE_API_KEY="your_pinecone_api_key_here"
+PINECONE_INDEX_NAME="agenticrag"
 
 # LLM Generation (Groq)
 GROQ_API_KEY="your_groq_api_key_here"
-
-# Observability (LangSmith)
-LANGCHAIN_TRACING_V2="true"
-LANGCHAIN_ENDPOINT="https://api.smith.langchain.com"
-LANGCHAIN_API_KEY="your_langsmith_api_key_here"
-LANGCHAIN_PROJECT="TierRAG"
+OPENAI_MODEL_GROQ="openai/gpt-oss-120b"
 ```
 
-*(Note: Chunking parameters, cache thresholds, and model selections are further configurable in `src/config.py`)*
-
----
-
-## How to Run
-
-1. **Start the FastAPI Server:**
-Ensure your virtual environment is activated, then run the application using Uvicorn:
-```bash
-uvicorn main:app --reload
-```
-
-2. **Access the API Documentation:**
-Once the server is running, open your browser and navigate to the interactive Swagger UI:
-👉 **[http://localhost:8000/docs](http://localhost:8000/docs)**
-
-3. **General Usage Flow Testing:**
-   - **Register & Login:** Use `POST /api/admin/register` then `POST /api/admin/login` to get a JWT Bearer token.
-   - **Authorize Context:** Click the "Authorize" button in Swagger UI and paste the Bearer token.
-   - **Upload Data:** Use `POST /upload` to upload a `.pdf` or `.txt` file.
-   - **Query:** Use `POST /query` to ask questions about your uploaded documents and see the multi-tier caching in action!
-
----
+You can further tweak chunk sizes, overlaps, caching thresholds (`SEMANTIC_CACHE_THRESHOLD`), and models inside `src/config.py`.
 
 ## Project Structure
 
-```
-├── main.py                  # FastAPI app entrypoint
-├── requirements.txt         # Project dependencies
-├── api/
-│   ├── auth/                # JWT Registration & login
-│   ├── ingestion/           # Versioned document upload
-│   └── generation/          # Query & Answer generation (Caching integration)
+```text
 ├── src/
-│   ├── config.py            # Global Config (MongoDB, Pinecone, Chunking, Cache Thresholds)
-│   ├── chunking/            # Splitting logic (Parent-Child & Recursive Character)
-│   ├── embedding/           # Pinecone vectorization and indexing
-│   ├── retrieval/           # Active doc filtering & Reranking
-│   ├── generation/          # Groq LLM integration
-│   └── caching/             # 3-Tier In-Memory Dictionary Caches (Exact, Semantic, Retrieval)
-└── docs/
-    └── architecture.md      # Detailed diagrams & design decisions
+│   ├── config.py                 # Global configurations (Model names, chunk sizes, DB names)
+│   ├── adaptive_router.py        # LLM-based query router
+│   ├── chunking/
+│   │   └── parent_child.py       # Logic for parent-child split and document loading
+│   ├── embedding/
+│   │   └── embed.py              # Pinecone index management and batch upsert
+│   ├── retrieval/
+│   │   ├── retriever.py          # Standard Pinecone vector search
+│   │   └── reranker.py           # Pinecone search with Cross-Encoder reranking
+│   ├── generation/
+│   │   └── generator.py          # LLM answer generation and context building
+│   └── caching/
+│       └── semantic_cache.py     # In-memory scalable semantic cache
+├── notebooks/                    # Jupyter notebooks for testing and experimentation
+├── .env.example                  # Example environment variables
+└── requirements.txt              # Project dependencies
 ```

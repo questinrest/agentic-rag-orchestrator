@@ -9,5 +9,4 @@ ipykernel
 certifi
 langchain-groq
 numpy
-langsmith
 sentence-transformers

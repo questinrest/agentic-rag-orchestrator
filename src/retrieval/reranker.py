@@ -1,10 +1,10 @@
 from typing import List, Dict
 from src.embedding.embed import INDEX
 from src.config import TOP_K, TOP_N, PINECONE_RERANKER_MODEL
-from langsmith import traceable
 
 
-@traceable(run_type="retriever", name="Pinecone Retrieval with Reranker")
+
+
 def search_vector_db_reranker(
     namespace: str,
     query: str,

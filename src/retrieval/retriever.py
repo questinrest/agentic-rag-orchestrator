@@ -1,10 +1,10 @@
 from typing import List, Dict
 from src.embedding.embed import INDEX
 from src.config import TOP_K
-from langsmith import traceable
 
 
-@traceable(run_type="retriever", name="Standard Pinecone Retrieval")
+
+
 def search_vector_db(
     namespace: str,
     query: str,

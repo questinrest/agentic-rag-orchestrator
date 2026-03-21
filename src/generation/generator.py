@@ -1,6 +1,6 @@
 from typing import List, Dict
 from langchain_groq import ChatGroq
-from langsmith import traceable
+
 from src.config import (
     OPENAI_MODEL_GROQ,
     TEMPERATURE,
@@ -84,7 +84,7 @@ def context_build(retrieved_chunks: List[Dict], namespace: str) -> str:
     return "\n\n".join(sections)
 
 
-@traceable(run_type="chain", name="Generate Final Answer")
+
 def generate_answer(query: str, chunks: List[Dict], namespace: str) -> str:
     context = context_build(chunks, namespace)
     messages = [

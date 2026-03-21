@@ -1,7 +1,7 @@
 import time
 from typing import List, Dict
 from pinecone import Pinecone
-from langsmith import traceable
+
 from src.config import (
     PINECONE_API_KEY,
     PINECONE_CLOUD,
@@ -52,7 +52,7 @@ def get_or_create_index(
 INDEX = get_or_create_index()
 
 
-@traceable(run_type="tool", name="Pinecone Upsert")
+
 def upsert_chunks(
     chunks: List[Dict],
     namespace: str,

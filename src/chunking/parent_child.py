@@ -4,7 +4,7 @@ from typing import List, Dict
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyMuPDFLoader, TextLoader
 from langchain_core.documents import Document
-from langsmith import traceable
+
 from src.config import (
     PARENT_CHUNK_SIZE,
     PARENT_CHUNK_OVERLAP,
@@ -42,7 +42,7 @@ def document_loader(file_path: Path) -> List[Document]:
 
 # Parent Splitter
 
-@traceable(run_type="chain", name="Parent Splitter")
+
 def parent_splitter(
     documents: List[Document],
     chunk_size: int,
@@ -59,7 +59,7 @@ def parent_splitter(
 
 # Child Splitter
 
-@traceable(run_type="chain", name="Child Splitter")
+
 def children_splitter(
     parent_chunks: List[Document],
     chunk_size: int,

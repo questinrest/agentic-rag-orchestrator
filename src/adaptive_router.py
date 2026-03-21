@@ -1,5 +1,5 @@
 from langchain_groq import ChatGroq
-from langsmith import traceable
+
 from src.config import (
     OPENAI_MODEL_GROQ,
     TEMPERATURE,
@@ -14,7 +14,7 @@ llm_for_routing = ChatGroq(
     max_tokens=MAX_TOKENS,
 )
 
-@traceable(name="Adaptive Router")
+
 def llm_router(query: str) -> str:
     prompt = f"""
     You are a strict routing classifier for a RAG system.
