@@ -1,14 +1,38 @@
 # Agentic RAG Pipeline
 
-A highly modular and efficient Retrieval-Augmented Generation (RAG) system built with **LangChain**, **Pinecone**, **MongoDB**, and **Groq for LLM inferencing**. This project focuses on intelligent routing, optimized context retrieval using Parent-Child chunking, semantic caching, and full observability.
+A highly modular and efficient Retrieval-Augmented Generation (RAG) system built with **LangChain**, **Pinecone**, **MongoDB**, and **Groq for LLM inferencing**. This project focuses on intelligent routing, optimized context retrieval using Parent-Child chunking, semantic caching, and full observability. Advanced agentic workflows (like Corrective RAG) are currently being explored and prototyped in Jupyter Notebooks before integration into the core codebase.
 
-## Key Features
+## Key Features (Core Codebase)
 
 - **Adaptive Routing**: Intelligently routes user queries to the appropriate handler (Vectorstore, Direct LLM, or Web Search) using a Groq-powered classifier (`adaptive_router.py`).
 - **Semantic Caching**: Implements an in-memory semantic cache using `sentence-transformers` (`all-MiniLM-L6-v2`). This avoids redundant embedding and LLM calls for semantically similar queries by returning cached answers based on a cosine similarity threshold.
 - **Advanced Chunking Strategy**: Supports `parent_child`. By utilizing Parent-Child mapping, the system retrieves narrow, highly relevant chunks (children) from Pinecone but feeds the LLM the broader context (parents) from MongoDB to maintain full semantic meaning without token bloat.
 - **High-Performance Vector Search & Reranking**: Uses Pinecone for vector storage and search, supporting cross-encoder reranking (`bge-reranker-v2-m3`) to surface the most relevant chunks.
 - **High-Speed Generation**: Integrates the blazing-fast Groq API (`openai/gpt-oss-120b` or similar) to generate final answers reliably with precise citations.
+
+## Learning & Exploration (Notebooks)
+
+We are actively experimenting with **LangGraph** and **Corrective RAG (CRAG)** workflows to make the system fully self-correcting. The following features are currently prototyped in the `notebooks/` directory and are slated for core integration:
+- Document Grading (binary relevance scoring)
+- Query Rewriting (looping back when retrieval fails)
+- Web Search Fallbacks
+- LangGraph continuous state control loops
+
+## Current Project Status (Agentic Pipeline Checklist)
+
+Here is the progress on the core Agentic Pipeline goals. *(Note: Items marked as "Exploration" are currently prototyped in notebooks, waiting to be modularized into `src/`)*:
+
+- [x] **Ingest documents** - load ≥ 3 docs, chunk, embed, store in a vector DB
+- [x] **Query Router** - classify query as llm_direct / vectorstore / web_search using structured LLM output
+- [x] **Retrieve** - fetch top-k chunks from vector store
+- [ ] **Grade Documents** - binary relevance score (yes/no) per chunk via LLM *(Exploration)*
+- [ ] **Query Rewriter** - if all chunks irrelevant, rewrite the query and retry *(Exploration)*
+- [ ] **Fallback** - if retry fails, use web search (Tavily) or LLM parametric knowledge *(Exploration)*
+- [x] **Generate Answer** - synthesise context into a grounded response
+- [ ] **Hallucination Grader** - check if answer is supported by source documents *(Pending)*
+- [ ] **Answer Quality Grader** - check if answer actually addresses the question *(Pending)*
+- [ ] **Loop Control** - max 3 retry iterations, system must terminate gracefully *(Exploration)*
+- [x] **Demo** - notebooks showing all pipeline branches in action
 
 ## Architecture
 
