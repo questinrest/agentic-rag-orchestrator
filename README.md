@@ -34,8 +34,9 @@ flowchart TD
 
     CRAG -- "Relevant\ndocs found" --> GEN
 
-    CRAG -- "Irrelevant\nretries < 3" --> REWRITE[Rewrite Query\nSelf-RAG Step 5]
-    REWRITE --> RET
+    CRAG -- "Irrelevant\nretries < 3" --> REWRITE[Rewrite Query\nSelf-RAG]
+    REWRITE -- "original route = vectorstore" --> RET
+    REWRITE -- "original route = web_search" --> WEB
 
     CRAG -- "Irrelevant\nretries >= 3\nexhausted" --> WEB
 
@@ -46,7 +47,7 @@ flowchart TD
 
     GRADE -- "Hallucination\ndetected\nre-generate" --> GEN
 
-    GRADE -- "No hallucination\nbut answer is off-topic\nrewrite + re-retrieve" --> REWRITE
+    GRADE -- "No hallucination\nbut answer is off-topic\nrewrite query" --> REWRITE
 
     GRADE -- "No hallucination\nHigh quality answer" --> CS
 

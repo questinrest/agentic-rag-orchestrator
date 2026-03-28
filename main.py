@@ -32,6 +32,15 @@ def router_node(state: AgenticRAGState):
 def route_start(state: AgenticRAGState) -> str:
     return state["route"]
 
+def rewrite_routing(state: AgenticRAGState) -> str:
+    """After a query rewrite, route back to web_search if that was the original route.
+    Otherwise route back to vector retrieve."""
+    if state.get("route") == "web_search":
+        logger.info("Rewrite routing: original route was web_search → retrying web search")
+        return "web_search"
+    logger.info("Rewrite routing: original route was vectorstore → retrying retrieve")
+    return "retrieve"
+
 def evaluate_cond_edge(state: AgenticRAGState) -> str:
     if state["needs_web_search"]:
         if state.get("retries", 0) < 3:
@@ -90,7 +99,14 @@ builder.add_conditional_edges(
     }
 )
 
-builder.add_edge("rewrite_query", "retrieve")
+builder.add_conditional_edges(
+    "rewrite_query",
+    rewrite_routing,
+    {
+        "web_search": "web_search",
+        "retrieve": "retrieve"
+    }
+)
 builder.add_edge("web_search", "generate")
 
 builder.add_conditional_edges(
