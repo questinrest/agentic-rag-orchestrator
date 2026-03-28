@@ -2,7 +2,7 @@
 
 A robust, stateful Retrieval-Augmented Generation (RAG) system synthesizing **Adaptive RAG**, **Corrective RAG (CRAG)**, and **Self-RAG** into a dynamic cyclical pipeline. Built using LangGraph, Pinecone, MongoDB, and Groq.
 
-## 🏗️ Architecture
+## Architecture
 
 The system intelligently routes, validates, and refines queries using a rigorous, graph-based state machine that dynamically recovers from hallucinations and poor retrievals.
 
@@ -43,20 +43,20 @@ graph TD
     L -- No --> D
 ```
 
-## 🛠️ framework choice & why
+## framework choice & why
 
 - **langgraph**: used as an orchestration engine for the agentic rag pipeline. 
 - **groq**: offers free tier for llms.
 - **duckduckgo search**: free search api. acts as a fallback.
 - **mongodb + pinecone**: hybrid data layer. pinecone is fast for vector search. mongodb holds the heavy parent chunks with relevant metadata.
 
-## 🧩 chunking strategy & why
+## chunking strategy & why
 
 i used a **parent-child chunking** method.
 - **the process**: split docs into big parent chunks. then split those into small child chunks. pinecone only stores the small child chunks. if pinecone finds a match, it gives me the `parent_id`, used this to fetch the huge parent text from mongodb.
 - **why?**: this gives me the best of both worlds. tiny chunks give exact search hits. big chunks give the llm rich context to answer correctly.
 
-## ⚖️ design trade-offs
+## design trade-offs
 
 1. **latency vs. accuracy**
 running multiple checks adds latency. but it reduces hallucinations.
@@ -65,7 +65,7 @@ running multiple checks adds latency. but it reduces hallucinations.
 self-rag loops can run forever. it might keep searching for missing facts. i added a hard limit. the system tries max 3 times.
 
 
-## 📊 evaluation (ragas)
+## evaluation (ragas)
 
 because i don't have access to an explicitly labeled ground-truth dataset, i built an automated evaluation pipeline using the **ragas** framework. it focuses on two critical reference-free metrics to grade the language model:
 - **faithfulness**: checks if the llm hallucinated facts outside the source documents.
@@ -89,7 +89,7 @@ i evaluated 3 distinct scenarios representing the pipeline's core branches:
 
 > **note**: you can reproduce these metrics by running the `notebooks/ragas_evaluation.ipynb` file locally. it uses custom huggingface embeddings and groq to prevent api costs!
 
-## 🚀 Quick Start Demo
+## Quick Start Demo
 
 Run the fully unified Agentic pipeline interactively from your terminal to see the routing branches natively executed:
 
