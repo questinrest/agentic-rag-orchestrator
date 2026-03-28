@@ -1,17 +1,17 @@
 from langchain_groq import ChatGroq
 
 from src.config import (
-    OPENAI_MODEL_GROQ,
-    TEMPERATURE,
-    MAX_TOKENS,
-    GROQ_API_KEY,
+    ADAPTIVE_RAG_MODEL,
+    ADAPTIVE_RAG_TEMPERATURE,
+    ADAPTIVE_RAG_MAX_TOKENS,
+    ADAPTIVE_RAG_API_KEY,
 )
 
 llm_for_routing = ChatGroq(
-    model=OPENAI_MODEL_GROQ,
-    api_key=GROQ_API_KEY,
-    temperature=TEMPERATURE,
-    max_tokens=MAX_TOKENS,
+    model=ADAPTIVE_RAG_MODEL,
+    api_key=ADAPTIVE_RAG_API_KEY,
+    temperature=ADAPTIVE_RAG_TEMPERATURE,
+    max_tokens=ADAPTIVE_RAG_MAX_TOKENS,
 )
 
 

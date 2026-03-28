@@ -1,91 +1,98 @@
 # Agentic RAG Pipeline
 
-A modular Retrieval-Augmented Generation (RAG) system built with LangChain, Pinecone, MongoDB, and Groq. It features intelligent routing, context retrieval using Parent-Child chunking, and semantic caching. Advanced workflows are currently explored in Jupyter Notebooks.
+A robust, stateful Retrieval-Augmented Generation (RAG) system synthesizing **Adaptive RAG**, **Corrective RAG (CRAG)**, and **Self-RAG** into a dynamic cyclical pipeline. Built using LangGraph, Pinecone, MongoDB, and Groq.
 
-## Key Features (Core)
+## 🏗️ Architecture
 
-- **Adaptive Routing**: Routes queries to Vectorstore, Direct LLM, or Web Search via an LLM classifier.
-- **Semantic Caching**: Uses `sentence-transformers` for in-memory caching to avoid redundant API calls.
-- **Parent-Child Chunking**: Retrieves narrow chunks from Pinecone but feeds broader parent context from MongoDB to the LLM. 
-- **Vector Search**: Uses Pinecone for storage and search, with cross-encoder reranking.
-- **Fast Generation**: Uses Groq API for high-speed, reliable generation.
+The system intelligently routes, validates, and refines queries using a rigorous, graph-based state machine that dynamically recovers from hallucinations and poor retrievals.
 
-## Learning & Exploration (Notebooks)
+```mermaid
+graph TD
+    A([User Query]) --> Cache{Semantic Cache Hit?}
+    
+    Cache -- Yes --> K([Final Response])
+    Cache -- No --> B{Adaptive Router}
+    
+    B -- llm_direct --> C[Direct Generation]
+    B -- web_search --> D[Web Search Fallback]
+    B -- vectorstore --> E[Pinecone Retrieval]
+    
+    E --> F{CRAG Document Grader}
+    F -- Ambiguous/Incorrect --> G[Rewrite Query]
+    F -- Relevant --> H[Generate Answer]
+    D --> H
+    
+    H --> I{Self-RAG: Hallucination Check}
+    I -- Not Grounded --> H
+    
+    I -- Grounded --> J{Self-RAG: Answer Quality Check}
+    J -- Doesn't Address Query --> G
+    
+    J -- High Quality --> CacheStore[Update Semantic Cache]
+    C --> CacheStore
+    CacheStore --> K
+    
+    G --> L{Loop Control: Retries < 3}
+    L -- Yes --> E
+    L -- No --> D
+```
 
-I am actively experimenting with LangGraph and Corrective RAG (CRAG) in the `notebooks/` directory. These features will be integrated into the core codebase later:
-- Document grading
-- Query rewriting
-- Web search fallbacks
-- LangGraph state loops
+## 🛠️ framework choice & why
 
-## Project Status
+- **langgraph**: used as an orchestration engine for the agentic rag pipeline. 
+- **groq**: offers free tier for llms.
+- **duckduckgo search**: free search api. acts as a fallback.
+- **mongodb + pinecone**: hybrid data layer. pinecone is fast for vector search. mongodb holds the heavy parent chunks with relevant metadata.
 
-*(Items marked "Exploration" are prototyped in notebooks, pending core integration).*
+## 🧩 chunking strategy & why
 
-- [x] **Ingest documents**: Load ≥ 3 docs, chunk, embed, store in DB.
-- [x] **Query Router**: Classify query as llm_direct, vectorstore, or web_search.
-- [x] **Retrieve**: Fetch top-k chunks from vector store.
-- [ ] **Grade Documents**: Binary relevance score via LLM. *(Exploration)*
-- [ ] **Query Rewriter**: Rewrite query if chunks are irrelevant. *(Exploration)*
-- [ ] **Fallback**: Use web search or LLM knowledge if retrieval fails. *(Exploration)*
-- [x] **Generate Answer**: Synthesise context into a grounded response.
-- [ ] **Hallucination Grader**: Check if answer is supported by sources. *(Pending)*
-- [ ] **Answer Quality Grader**: Check if answer addresses the question. *(Pending)*
-- [ ] **Loop Control**: Max 3 retries, terminate gracefully. *(Exploration)*
-- [x] **Demo**: Notebooks showing pipeline branches.
+i used a **parent-child chunking** method.
+- **the process**: split docs into big parent chunks. then split those into small child chunks. pinecone only stores the small child chunks. if pinecone finds a match, it gives me the `parent_id`, used this to fetch the huge parent text from mongodb.
+- **why?**: this gives me the best of both worlds. tiny chunks give exact search hits. big chunks give the llm rich context to answer correctly.
 
-## Architecture
+## ⚖️ design trade-offs
 
-1. **Ingestion (`src/chunking`)**: Documents are split into parent-child chunks and stored in MongoDB.
-2. **Embedding (`src/embedding`)**: Child chunks are embedded and upserted into Pinecone.
-3. **Routing (`src/adaptive_router.py`)**: Evaluates query to decide the appropriate handler.
-4. **Caching (`src/caching`)**: Semantically similar queries return cached results instantly.
-5. **Retrieval (`src/retrieval`)**: Embedded queries match against Pinecone and get reranked.
-6. **Generation (`src/generation`)**: The LLM aggregates parent chunks and generates a response.
+1. **latency vs. accuracy**
+running multiple checks adds latency. but it reduces hallucinations.
 
-## Setup Instructions
+2. **deterministic loop boundaries**
+self-rag loops can run forever. it might keep searching for missing facts. i added a hard limit. the system tries max 3 times.
 
-### 1. Prerequisites
-- Python 3.11+
-- MongoDB Atlas
-- Pinecone API Key
-- Groq API Key
 
-### 2. Installation
+## 📊 evaluation (ragas)
+
+because i don't have access to an explicitly labeled ground-truth dataset, i built an automated evaluation pipeline using the **ragas** framework. it focuses on two critical reference-free metrics to grade the language model:
+- **faithfulness**: checks if the llm hallucinated facts outside the source documents.
+- **answer relevancy**: checks if the generated answer directly addresses the user's intent.
+
+### test cases & results
+
+i evaluated 3 distinct scenarios representing the pipeline's core branches:
+
+1. **vectorstore route**: *"Tell me about the cross-modal architecture of RAG-Anything."*
+   - **faithfulness**: `__` (highly grounded in the retrieved child chunks)
+   - **answer relevancy**: `__` (focused entirely on the architecture components)
+
+2. **web search fallback**: *"Who won the latest Super Bowl?"*
+   - **faithfulness**: `__` (copied directly from duckduckgo snippet)
+   - **answer relevancy**: `__` (direct factual answer)
+
+3. **direct llm route**: *"What is the capital of France?"*
+   - **faithfulness**: `__` (bypasses retrieval, relies on parametric knowledge)
+   - **answer relevancy**: `__` (direct factual answer)
+
+> **note**: you can reproduce these metrics by running the `notebooks/ragas_evaluation.ipynb` file locally. it uses custom huggingface embeddings and groq to prevent api costs!
+
+## 🚀 Quick Start Demo
+
+Run the fully unified Agentic pipeline interactively from your terminal to see the routing branches natively executed:
+
 ```bash
-git clone <your-repo-url>
-cd <repo-name>
-python -m venv .venv
-# Windows:
+# 1. Start the Virtual Environment
 .venv\Scripts\activate
-# macOS/Linux:
-source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
+
+# 2. Run the Demo CLI
+python main.py --query "Tell me about RAG-Anything's architecture"
 ```
 
-### 3. Configuration
-Set up your `.env`:
-```env
-CONNECTION_STRING="mongodb+srv://<user>:<password>@cluster0...mongodb.net/"
-PINECONE_API_KEY="your_pinecone_api_key_here"
-PINECONE_INDEX_NAME="agenticrag"
-GROQ_API_KEY="your_groq_api_key_here"
-OPENAI_MODEL_GROQ="openai/gpt-oss-120b"
-```
-
-## Project Structure
-
-```text
-├── src/
-│   ├── config.py                 # Global configurations
-│   ├── adaptive_router.py        # LLM query router
-│   ├── chunking/                 # Document ingestion & splitting
-│   ├── embedding/                # Pinecone upsert logic
-│   ├── retrieval/                # Pinecone vector search & reranking
-│   ├── generation/               # LLM generation
-│   └── caching/                  # Semantic cache
-├── notebooks/                    # Exploration and prototyping
-├── .env.example                  # Example environment variables
-└── requirements.txt              # Dependencies
-```
+For Jupyter fans, refer to `notebooks/demo_agentic_rag.ipynb` to view step-by-step stream traces of the Graph navigating edge constraints.

@@ -50,18 +50,56 @@ TOP_N : int = int(os.getenv("TOP_N", 5))
 # choose from : "recursive_character", "parent_child"
 CHUNKING_STRATEGY : str = os.getenv("CHUNKING_STRATEGY", "parent_child")
 
+
+
+# Pinecone
+PINECONE_API_KEY : str = os.getenv("PINECONE_API_KEY")
+PINECONE_CLOUD : str = os.getenv("PINECONE_CLOUD", "aws")
+PINECONE_REGION : str = os.getenv("PINECONE_REGION", "us-east-1")
+PINECONE_INDEX_NAME : str = os.getenv("PINECONE_INDEX_NAME", "agenticrag")
+PINECONE_EMBEDDING_MODEL : str = os.getenv("PINECONE_EMBEDDING_MODEL", "llama-text-embed-v2")
+PINECONE_RERANKER_MODEL : str = os.getenv("PINECONE_RERANKER_MODEL", "bge-reranker-v2-m3")
+BATCH_SIZE : int = int(os.getenv("BATCH_SIZE", 96))
+
+# Retrieval
+TOP_K : int = int(os.getenv("TOP_K", 10))
+TOP_N : int = int(os.getenv("TOP_N", 5))
+
+
+# Chunking Strategy
+# choose from : "recursive_character", "parent_child"
+CHUNKING_STRATEGY : str = os.getenv("CHUNKING_STRATEGY", "parent_child")
+
 # Parent Child Chunking
 PARENT_CHUNK_SIZE : int = int(os.getenv("PARENT_CHUNK_SIZE", 1000))
 PARENT_CHUNK_OVERLAP : int = int(os.getenv("PARENT_CHUNK_OVERLAP", 200))
 CHILD_CHUNK_SIZE : int = int(os.getenv("CHILD_CHUNK_SIZE", 200))
 CHILD_CHUNK_OVERLAP : int = int(os.getenv("CHILD_CHUNK_OVERLAP", 20))
 
-# LLM (Groq)
+# LLM (Groq) default fallback for Generation
 GROQ_API_KEY : str = os.getenv("GROQ_API_KEY")
 OPENAI_MODEL_GROQ : str = os.getenv("OPENAI_MODEL_GROQ", "openai/gpt-oss-120b")
 TEMPERATURE : float = float(os.getenv("TEMPERATURE", 0.2))
 MAX_TOKENS : int = int(os.getenv("MAX_TOKENS", 1024))
 
+# Adaptive RAG Router LLM
+ADAPTIVE_RAG_API_KEY : str = os.getenv("ADAPTIVE_RAG_API_KEY", GROQ_API_KEY)
+ADAPTIVE_RAG_MODEL : str = os.getenv("ADAPTIVE_RAG_MODEL", OPENAI_MODEL_GROQ)
+ADAPTIVE_RAG_TEMPERATURE : float = float(os.getenv("ADAPTIVE_RAG_TEMPERATURE", 0.0))
+ADAPTIVE_RAG_MAX_TOKENS : int = int(os.getenv("ADAPTIVE_RAG_MAX_TOKENS", 512))
 
-# CACHE Settings
+# Corrective RAG (CRAG) Evaluator LLM
+CRAG_API_KEY : str = os.getenv("CRAG_API_KEY", GROQ_API_KEY)
+CRAG_MODEL : str = os.getenv("CRAG_MODEL", OPENAI_MODEL_GROQ)
+CRAG_TEMPERATURE : float = float(os.getenv("CRAG_TEMPERATURE", 0.0))
+CRAG_MAX_TOKENS : int = int(os.getenv("CRAG_MAX_TOKENS", 512))
+
+# Self RAG Grader/Rewriter LLM
+SELF_RAG_API_KEY : str = os.getenv("SELF_RAG_API_KEY", GROQ_API_KEY)
+SELF_RAG_MODEL : str = os.getenv("SELF_RAG_MODEL", OPENAI_MODEL_GROQ)
+SELF_RAG_TEMPERATURE : float = float(os.getenv("SELF_RAG_TEMPERATURE", 0.0))
+SELF_RAG_MAX_TOKENS : int = int(os.getenv("SELF_RAG_MAX_TOKENS", 512))
+
+
+# CACHE Setting
 SEMANTIC_CACHE_THRESHOLD : float = float(os.getenv("SEMANTIC_CACHE_THRESHOLD", "0.92"))

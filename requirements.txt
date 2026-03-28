@@ -10,3 +10,7 @@ certifi
 langchain-groq
 numpy
 sentence-transformers
+langgraph
+ddgs
+ragas
+datasets
