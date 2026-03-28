@@ -9,38 +9,41 @@ The system intelligently routes, validates, and refines queries using a rigorous
 ```mermaid
 graph TD
     A([User Query]) --> Cache{Semantic Cache Hit?}
-    
-    Cache -- Yes --> K([Final Response])
-    Cache -- No --> B{Adaptive Router}
-    
-    B -- llm_direct --> C[Direct Generation]
-    B -- web_search --> D[Web Search Fallback]
-    
-    %% Vectorstore Route with Reranker & Parent-Child Pattern
-    B -- vectorstore --> Pinecone[Pinecone Vector Search]
-    Pinecone --> RerankCheck{USE_RERANKING?}
-    RerankCheck -- Yes --> Reranker[Serverless Rerank Top-N]
-    Reranker --> Mongo[Fetch Parent Docs from MongoDB]
-    RerankCheck -- No --> Mongo
-    Mongo --> F{CRAG Document Grader}
-    
-    F -- Ambiguous/Incorrect --> G[Rewrite Query]
-    F -- Relevant --> H[Generate Answer]
-    D --> H
-    
-    H --> I{Self-RAG: Hallucination Check}
-    I -- Not Grounded --> H
-    
-    I -- Grounded --> J{Self-RAG: Answer Quality Check}
-    J -- Doesn't Address Query --> G
-    
-    J -- High Quality --> CacheStore[Update Semantic Cache]
-    C --> CacheStore
+    Cache -- Yes --> K([Return Cached Answer])
+    Cache -- No --> Router{Adaptive Router}
+
+    %% --- Three Entry Routes ---
+    Router -- vectorstore --> Retrieve[Retrieve Node]
+    Router -- web_search --> WebSearch[Web Search Node]
+    Router -- llm_direct --> Generate[Generate Node]
+
+    %% --- Vectorstore Internal Detail ---
+    subgraph Retrieve Node
+        Pinecone[Pinecone Vector Search] --> RerankCheck{USE_RERANKING?}
+        RerankCheck -- Yes --> Reranker[Serverless Rerank Top-N]
+        RerankCheck -- No --> Mongo
+        Reranker --> Mongo[Fetch Parent Docs - MongoDB]
+    end
+
+    %% --- CRAG Evaluate ---
+    Retrieve --> Evaluate{CRAG Document Grader}
+    Evaluate -- Relevant --> Generate
+    Evaluate -- "Irrelevant & retries < 3" --> RewriteQuery[Rewrite Query Node]
+    Evaluate -- "Irrelevant & retries >= 3" --> WebSearch
+
+    %% --- Web Search & Rewrite Convergence ---
+    WebSearch --> Generate
+    RewriteQuery --> Retrieve
+
+    %% --- grade_generation conditional edge ---
+    Generate --> GradeGen{"grade_generation()"}
+
+    GradeGen -- "llm_direct route\nOR retries >= 3" --> CacheStore[Update Semantic Cache]
+    GradeGen -- "Hallucination: no\n(vectorstore only)" --> Generate
+    GradeGen -- "Hallucination: yes\nQuality: no" --> RewriteQuery
+    GradeGen -- "Hallucination: yes\nQuality: yes" --> CacheStore
+
     CacheStore --> K
-    
-    G --> L{Loop Control: Retries < 3}
-    L -- Yes --> Pinecone
-    L -- No --> D
 ```
 
 ## framework choice & why
