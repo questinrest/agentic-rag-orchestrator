@@ -1,6 +1,9 @@
 from langchain_groq import ChatGroq
 from src.config import SELF_RAG_MODEL, SELF_RAG_MAX_TOKENS, SELF_RAG_API_KEY, SELF_RAG_TEMPERATURE
 from src.workflows.state import AgenticRAGState
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 __all__ = ["rewrite_query_node", "hallucination_grader", "answer_quality_grader"]
 
@@ -22,6 +25,7 @@ def rewrite_query_node(state: AgenticRAGState):
     Formulate an improved question:
     """
     response = llm_evaluator.invoke(prompt).content.strip()
+    logger.info(f"Query Rewritten: '{query}' -> '{response}'")
     return {"query": response, "retries": state.get("retries", 0) + 1}
 
 
@@ -43,7 +47,9 @@ def hallucination_grader(state: AgenticRAGState) -> str:
     Binary score (yes or no):
     """
     response = llm_evaluator.invoke(prompt).content.strip().lower()
-    return "yes" if "yes" in response else "no"
+    score = "yes" if "yes" in response else "no"
+    logger.info(f"Hallucination Score: {score}")
+    return score
 
 
 def answer_quality_grader(state: AgenticRAGState) -> str:
@@ -61,4 +67,6 @@ def answer_quality_grader(state: AgenticRAGState) -> str:
     Binary score (yes or no):
     """
     response = llm_evaluator.invoke(prompt).content.strip().lower()
-    return "yes" if "yes" in response else "no"
+    score = "yes" if "yes" in response else "no"
+    logger.info(f"Answer Quality Score: {score}")
+    return score

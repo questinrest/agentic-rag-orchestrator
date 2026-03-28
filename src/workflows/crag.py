@@ -2,11 +2,14 @@ import re
 from typing import List, Dict, TypedDict
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_groq import ChatGroq
-
 from src.retrieval.retriever import search_vector_db
+from src.retrieval.reranker import search_vector_db_reranker
 from src.generation.generator import llm
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
 from src.config import parent_store_collection
-from src.config import CRAG_MODEL, CRAG_MAX_TOKENS, CRAG_API_KEY, CRAG_TEMPERATURE
+from src.config import CRAG_MODEL, CRAG_MAX_TOKENS, CRAG_API_KEY, CRAG_TEMPERATURE, TOP_K, TOP_N, USE_RERANKING
 from src.workflows.state import AgenticRAGState
 
 llm_evaluator = ChatGroq(
@@ -46,11 +49,20 @@ def retrieve_node(state: AgenticRAGState):
     query = state["query"]
     namespace = state.get("namespace", "default_namespace")
     
-    retrieved_chunks = search_vector_db(
-        namespace=namespace, 
-        query=query, 
-        top_k=3
-    )
+    if USE_RERANKING:
+        logger.info("Using Serverless Pinecone Reranking Model")
+        retrieved_chunks = search_vector_db_reranker(
+            namespace=namespace, 
+            query=query, 
+            top_k=TOP_K,
+            top_n=TOP_N
+        )
+    else:
+        retrieved_chunks = search_vector_db(
+            namespace=namespace, 
+            query=query, 
+            top_k=TOP_K
+        )
     
     parent_ids = {chunk.get("parent_id") for chunk in retrieved_chunks if chunk.get("parent_id")}
     
@@ -112,7 +124,7 @@ def web_search_node(state: AgenticRAGState):
         results = search.invoke(query)
         final_context_strips.append(f"[Web Search Results]: {results}")
     except Exception as e:
-        print(f"Web search failed: {e}")
+        logger.warning(f"Web search failed: {e}")
         
     return {"final_context_strips": final_context_strips}
 

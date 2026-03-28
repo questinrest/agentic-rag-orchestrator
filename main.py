@@ -11,6 +11,9 @@ load_dotenv(PROJECT_ROOT / ".env")
 
 from langgraph.graph import StateGraph, START, END
 
+from src.utils.logger import get_logger
+logger = get_logger(__name__)
+
 from src.workflows.state import AgenticRAGState
 from src.adaptive_router import llm_router
 from src.workflows.crag import retrieve_node, evaluate_node, web_search_node, generate_node
@@ -111,7 +114,7 @@ def run_agentic_rag(query: str, namespace: str = "default_namespace") -> str:
     # 1. Check Semantic Cache First
     cached_answer, cached_sources, query_emb = get_semantic_cache(query=query)
     if cached_answer:
-        print("\n--- SEMANTIC CACHE HIT ---")
+        logger.info("Semantic Cache Hit")
         return cached_answer
         
     initial_state = {
@@ -146,6 +149,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     print(f"\\n[User Query]: {args.query}\\n")
-    print("Running Agentic RAG Pipeline...")
+    logger.info("Running Agentic RAG Pipeline...")
     answer = run_agentic_rag(args.query)
+    logger.info("Agentic RAG Pipeline Execution Completed")
     print("\\n[Final Response]:\\n", answer)

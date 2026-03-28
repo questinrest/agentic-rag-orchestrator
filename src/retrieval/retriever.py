@@ -1,9 +1,9 @@
 from typing import List, Dict
 from src.embedding.embed import INDEX
 from src.config import TOP_K
+from src.utils.logger import get_logger
 
-
-
+logger = get_logger(__name__)
 
 def search_vector_db(
     namespace: str,
@@ -33,4 +33,5 @@ def search_vector_db(
             "parent_id": fields.get("parent_id", ""),
         })
 
+    logger.info(f"Search vector DB returned {len(retrieved)} hits for namespace {namespace}")
     return retrieved

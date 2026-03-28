@@ -15,9 +15,15 @@ graph TD
     
     B -- llm_direct --> C[Direct Generation]
     B -- web_search --> D[Web Search Fallback]
-    B -- vectorstore --> E[Pinecone Retrieval]
     
-    E --> F{CRAG Document Grader}
+    %% Vectorstore Route with Reranker & Parent-Child Pattern
+    B -- vectorstore --> Pinecone[Pinecone Vector Search]
+    Pinecone --> RerankCheck{USE_RERANKING?}
+    RerankCheck -- Yes --> Reranker[Serverless Rerank Top-N]
+    Reranker --> Mongo[Fetch Parent Docs from MongoDB]
+    RerankCheck -- No --> Mongo
+    Mongo --> F{CRAG Document Grader}
+    
     F -- Ambiguous/Incorrect --> G[Rewrite Query]
     F -- Relevant --> H[Generate Answer]
     D --> H
@@ -33,7 +39,7 @@ graph TD
     CacheStore --> K
     
     G --> L{Loop Control: Retries < 3}
-    L -- Yes --> E
+    L -- Yes --> Pinecone
     L -- No --> D
 ```
 

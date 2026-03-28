@@ -41,8 +41,9 @@ def get_semantic_cache(
         if sim > highest_sim:
             highest_sim = sim
             best_match = cached_item
+            
     if best_match and highest_sim >= threshold:
-        print(f"Tier 2 (Semantic Cache) hit! Similarity: {highest_sim:.4f}")
+        logger.info(f"Tier 2 (Semantic Cache) hit! Similarity: {highest_sim:.4f}")
         return best_match["answer"], best_match["sources"], query_emb
 
     return None, None, query_emb

@@ -6,6 +6,9 @@ from src.config import (
     ADAPTIVE_RAG_MAX_TOKENS,
     ADAPTIVE_RAG_API_KEY,
 )
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 llm_for_routing = ChatGroq(
     model=ADAPTIVE_RAG_MODEL,
@@ -35,4 +38,7 @@ Query: {query}
 
 Answer:
     """
-    return llm_for_routing.invoke(prompt).content.strip()
+
+    route = llm_for_routing.invoke(prompt).content.strip()
+    logger.info(f"Query '{query}' classified to route: '{route}'")
+    return route

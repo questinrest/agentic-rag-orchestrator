@@ -42,32 +42,12 @@ PINECONE_RERANKER_MODEL : str = os.getenv("PINECONE_RERANKER_MODEL", "bge-rerank
 BATCH_SIZE : int = int(os.getenv("BATCH_SIZE", 96))
 
 # Retrieval
+USE_RERANKING : bool = os.getenv("USE_RERANKING", "True").lower() in ("true", "1", "t")
 TOP_K : int = int(os.getenv("TOP_K", 10))
 TOP_N : int = int(os.getenv("TOP_N", 5))
 
 
 # Chunking Strategy
-# choose from : "recursive_character", "parent_child"
-CHUNKING_STRATEGY : str = os.getenv("CHUNKING_STRATEGY", "parent_child")
-
-
-
-# Pinecone
-PINECONE_API_KEY : str = os.getenv("PINECONE_API_KEY")
-PINECONE_CLOUD : str = os.getenv("PINECONE_CLOUD", "aws")
-PINECONE_REGION : str = os.getenv("PINECONE_REGION", "us-east-1")
-PINECONE_INDEX_NAME : str = os.getenv("PINECONE_INDEX_NAME", "agenticrag")
-PINECONE_EMBEDDING_MODEL : str = os.getenv("PINECONE_EMBEDDING_MODEL", "llama-text-embed-v2")
-PINECONE_RERANKER_MODEL : str = os.getenv("PINECONE_RERANKER_MODEL", "bge-reranker-v2-m3")
-BATCH_SIZE : int = int(os.getenv("BATCH_SIZE", 96))
-
-# Retrieval
-TOP_K : int = int(os.getenv("TOP_K", 10))
-TOP_N : int = int(os.getenv("TOP_N", 5))
-
-
-# Chunking Strategy
-# choose from : "recursive_character", "parent_child"
 CHUNKING_STRATEGY : str = os.getenv("CHUNKING_STRATEGY", "parent_child")
 
 # Parent Child Chunking
@@ -78,9 +58,9 @@ CHILD_CHUNK_OVERLAP : int = int(os.getenv("CHILD_CHUNK_OVERLAP", 20))
 
 # LLM (Groq) default fallback for Generation
 GROQ_API_KEY : str = os.getenv("GROQ_API_KEY")
-OPENAI_MODEL_GROQ : str = os.getenv("OPENAI_MODEL_GROQ", "openai/gpt-oss-120b")
+OPENAI_MODEL_GROQ : str = os.getenv("OPENAI_MODEL_GROQ", "openai/gpt-oss-20b")
 TEMPERATURE : float = float(os.getenv("TEMPERATURE", 0.2))
-MAX_TOKENS : int = int(os.getenv("MAX_TOKENS", 1024))
+MAX_TOKENS : int = int(os.getenv("MAX_TOKENS", 4096))
 
 # Adaptive RAG Router LLM
 ADAPTIVE_RAG_API_KEY : str = os.getenv("ADAPTIVE_RAG_API_KEY", GROQ_API_KEY)

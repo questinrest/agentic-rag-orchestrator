@@ -7,7 +7,9 @@ from src.config import (
     MAX_TOKENS,
     GROQ_API_KEY
 )
+from src.utils.logger import get_logger
 
+logger = get_logger(__name__)
 
 llm = ChatGroq(
     model=OPENAI_MODEL_GROQ,
@@ -91,6 +93,7 @@ def generate_answer(query: str, chunks: List[Dict], namespace: str) -> str:
         ("system", SYSTEM_PROMPT),
         ("human", f"Context:\n{context}\n\n---\nQuestion: {query}"),
     ]
-
+    
+    logger.info("Generating final answer...")
     model_response = llm.invoke(messages)
     return model_response.content

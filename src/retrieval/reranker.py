@@ -1,9 +1,9 @@
 from typing import List, Dict
 from src.embedding.embed import INDEX
 from src.config import TOP_K, TOP_N, PINECONE_RERANKER_MODEL
+from src.utils.logger import get_logger
 
-
-
+logger = get_logger(__name__)
 
 def search_vector_db_reranker(
     namespace: str,
@@ -41,4 +41,5 @@ def search_vector_db_reranker(
             "parent_id": fields.get("parent_id", ""),
         })
 
+    logger.info(f"Reranker returned {len(retrieved)} hits (top_n={top_n})")
     return retrieved
