@@ -7,43 +7,50 @@ A robust, stateful Retrieval-Augmented Generation (RAG) system synthesizing **Ad
 The system intelligently routes, validates, and refines queries using a rigorous, graph-based state machine that dynamically recovers from hallucinations and poor retrievals.
 
 ```mermaid
-graph TD
-    A([User Query]) --> Cache{Semantic Cache Hit?}
-    Cache -- Yes --> K([Return Cached Answer])
-    Cache -- No --> Router{Adaptive Router}
+flowchart TD
+    A([User Query]) --> CACHE{Semantic Cache Hit?}
+    CACHE -- Yes --> DONE([Return Cached Answer])
+    CACHE -- No --> ROUTER{Adaptive Router}
 
-    %% --- Three Entry Routes ---
-    Router -- vectorstore --> Retrieve[Retrieve Node]
-    Router -- web_search --> WebSearch[Web Search Node]
-    Router -- llm_direct --> Generate[Generate Node]
+    %% ── Scenario A: LLM Direct ──────────────────────────────
+    ROUTER -- "llm_direct\ngeneral knowledge" --> GEN[Generate Node]
 
-    %% --- Vectorstore Internal Detail ---
-    subgraph Retrieve Node
-        Pinecone[Pinecone Vector Search] --> RerankCheck{USE_RERANKING?}
-        RerankCheck -- Yes --> Reranker[Serverless Rerank Top-N]
-        RerankCheck -- No --> Mongo
-        Reranker --> Mongo[Fetch Parent Docs - MongoDB]
+    %% ── Scenario B: Web Search ──────────────────────────────
+    ROUTER -- "web_search\nreal-time info" --> WEB[Web Search\nDuckDuckGo]
+    WEB --> GEN
+
+    %% ── Scenario C/D: Vectorstore ───────────────────────────
+    ROUTER -- "vectorstore\ndocuments / RAG" --> RET
+
+    subgraph RET["Retrieve Node (Step 3)"]
+        direction TB
+        P1[Pinecone Vector Search] --> R1{USE_RERANKING?}
+        R1 -- Yes --> R2[Serverless Reranker]
+        R1 -- No  --> R3[Fetch Parent Docs\nfrom MongoDB]
+        R2 --> R3
     end
 
-    %% --- CRAG Evaluate ---
-    Retrieve --> Evaluate{CRAG Document Grader}
-    Evaluate -- Relevant --> Generate
-    Evaluate -- "Irrelevant & retries < 3" --> RewriteQuery[Rewrite Query Node]
-    Evaluate -- "Irrelevant & retries >= 3" --> WebSearch
+    RET --> CRAG{CRAG Document Grader\nStep 4 — grade each doc}
 
-    %% --- Web Search & Rewrite Convergence ---
-    WebSearch --> Generate
-    RewriteQuery --> Retrieve
+    CRAG -- "Relevant\ndocs found" --> GEN
 
-    %% --- grade_generation conditional edge ---
-    Generate --> GradeGen{"grade_generation()"}
+    CRAG -- "Irrelevant\nretries < 3" --> REWRITE[Rewrite Query\nSelf-RAG Step 5]
+    REWRITE --> RET
 
-    GradeGen -- "llm_direct route\nOR retries >= 3" --> CacheStore[Update Semantic Cache]
-    GradeGen -- "Hallucination: no\n(vectorstore only)" --> Generate
-    GradeGen -- "Hallucination: yes\nQuality: no" --> RewriteQuery
-    GradeGen -- "Hallucination: yes\nQuality: yes" --> CacheStore
+    CRAG -- "Irrelevant\nretries >= 3\nexhausted" --> WEB
 
-    CacheStore --> K
+    %% ── Post-Generation: grade_generation ───────────────────
+    GEN --> GRADE{grade_generation\nStep 6}
+
+    GRADE -- "route = llm_direct\nOR retries >= 3\nno grading" --> CS[Update Semantic Cache]
+
+    GRADE -- "Hallucination\ndetected\nre-generate" --> GEN
+
+    GRADE -- "No hallucination\nbut answer is off-topic\nrewrite + re-retrieve" --> REWRITE
+
+    GRADE -- "No hallucination\nHigh quality answer" --> CS
+
+    CS --> DONE
 ```
 
 ## framework choice & why
