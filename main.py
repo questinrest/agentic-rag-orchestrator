@@ -49,6 +49,12 @@ def evaluate_cond_edge(state: AgenticRAGState) -> str:
             return "web_search"
     return "generate"
 
+def regenerate_node(state: AgenticRAGState):
+    """Increments hallucination retry counter before looping back to generate."""
+    count = state.get("hallucination_retries", 0) + 1
+    logger.info(f"Hallucination retry {count}/3 — regenerating answer...")
+    return {"hallucination_retries": count}
+
 def grade_generation(state: AgenticRAGState) -> str:
     if state.get("retries", 0) >= 3:
         return END
@@ -56,14 +62,19 @@ def grade_generation(state: AgenticRAGState) -> str:
     if state["route"] == "llm_direct":
         return END
 
+    # Guard against infinite hallucination loop
+    if state.get("hallucination_retries", 0) >= 3:
+        logger.warning("Max hallucination retries (3) reached — terminating.")
+        return END
+
     hallucination_score = hallucination_grader(state)
     if hallucination_score == "no":
-        return "generate" 
-        
+        return "regenerate"  # goes through counter node, then back to generate
+
     quality_score = answer_quality_grader(state)
     if quality_score == "no":
-        return "rewrite_query" 
-        
+        return "rewrite_query"
+
     return END
 
 # Build Full Agentic RAG Graph
@@ -75,6 +86,7 @@ builder.add_node("evaluate", evaluate_node)
 builder.add_node("web_search", web_search_node)
 builder.add_node("rewrite_query", rewrite_query_node)
 builder.add_node("generate", generate_node)
+builder.add_node("regenerate", regenerate_node)
 
 builder.add_edge(START, "router")
 builder.add_conditional_edges(
@@ -109,12 +121,14 @@ builder.add_conditional_edges(
 )
 builder.add_edge("web_search", "generate")
 
+builder.add_edge("regenerate", "generate")
+
 builder.add_conditional_edges(
     "generate",
     grade_generation,
     {
-        "generate": "generate", # Loop to regenerate if hallucinates
-        "rewrite_query": "rewrite_query", # Loop to search again if no useful answer
+        "regenerate": "regenerate",
+        "rewrite_query": "rewrite_query",
         END: END
     }
 )
@@ -142,6 +156,7 @@ def run_agentic_rag(query: str, namespace: str = "default_namespace") -> str:
         "needs_web_search": False,
         "answer": "",
         "retries": 0,
+        "hallucination_retries": 0,
         "route": ""
     }
     

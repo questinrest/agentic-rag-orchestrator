@@ -84,34 +84,33 @@ def retrieve_node(state: AgenticRAGState):
 def evaluate_node(state: AgenticRAGState):
     query = state["query"]
     documents = state["documents"]
-    
+
     final_context_strips = []
-    needs_web_search = False
-    
+
     for doc in documents:
         eval_result = crag_router(query, doc)
-        
+
         if "correct" in eval_result:
             strips = clean_and_split(doc)
             for strip in strips:
                 strip_eval = crag_router(query, strip)
                 if strip_eval in ["correct", "ambiguous", "good"]:
                     final_context_strips.append(strip)
-                    
+
         elif "ambiguous" in eval_result:
-            needs_web_search = True
+            # Ambiguous docs can still contribute useful strips
             strips = clean_and_split(doc)
             for strip in strips:
                 strip_eval = crag_router(query, strip)
                 if strip_eval in ["correct", "ambiguous", "good"]:
                     final_context_strips.append(strip)
-                    
-        else: # incorrect
-            needs_web_search = True
 
-    if len(final_context_strips) == 0:
-        needs_web_search = True
-            
+        # incorrect → contributes nothing, skip entirely
+
+    # Only trigger rewrite/web search if zero relevant strips were found across ALL docs
+    needs_web_search = len(final_context_strips) == 0
+
+    logger.info(f"CRAG evaluate: {len(final_context_strips)} relevant strips found. needs_web_search={needs_web_search}")
     return {"final_context_strips": final_context_strips, "needs_web_search": needs_web_search}
 
 

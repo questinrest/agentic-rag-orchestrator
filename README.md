@@ -8,50 +8,52 @@ The system intelligently routes, validates, and refines queries using a rigorous
 
 ```mermaid
 flowchart TD
-    A([User Query]) --> CACHE{Semantic Cache Hit?}
-    CACHE -- Yes --> DONE([Return Cached Answer])
-    CACHE -- No --> ROUTER{Adaptive Router}
+    A([User Query]) --> CACHE{Semantic Cache?}
+    CACHE -- Hit --> DONE([Return Cached Answer])
+    CACHE -- Miss --> ROUTER{Adaptive Router}
 
-    %% ── Scenario A: LLM Direct ──────────────────────────────
-    ROUTER -- "llm_direct\ngeneral knowledge" --> GEN[Generate Node]
+    ROUTER -- llm_direct --> GEN[Generate]
+    ROUTER -- web_search --> WEB[Web Search\nDuckDuckGo]
+    ROUTER -- vectorstore --> RET
 
-    %% ── Scenario B: Web Search ──────────────────────────────
-    ROUTER -- "web_search\nreal-time info" --> WEB[Web Search\nDuckDuckGo]
-    WEB --> GEN
-
-    %% ── Scenario C/D: Vectorstore ───────────────────────────
-    ROUTER -- "vectorstore\ndocuments / RAG" --> RET
-
-    subgraph RET["Retrieve Node (Step 3)"]
-        direction TB
-        P1[Pinecone Vector Search] --> R1{USE_RERANKING?}
-        R1 -- Yes --> R2[Serverless Reranker]
-        R1 -- No  --> R3[Fetch Parent Docs\nfrom MongoDB]
-        R2 --> R3
+    subgraph RET["Retrieve Node"]
+        direction LR
+        PIN[Pinecone\nVector Search] --> RNK{Reranking\nEnabled?}
+        RNK -- Yes --> RKR[Rerank Top-N] --> MDB[MongoDB\nParent Fetch]
+        RNK -- No --> MDB
     end
 
-    RET --> CRAG{CRAG Document Grader\nStep 4 — grade each doc}
+    RET --> CRAG
 
-    CRAG -- "Relevant\ndocs found" --> GEN
+    subgraph CRAG["CRAG Evaluate Node"]
+        direction TB
+        GR[Grade each doc\ncorrect / ambiguous / incorrect] --> ST[Extract relevant strips\nfrom correct + ambiguous docs]
+        ST --> CHK{Any strips\nfound?}
+    end
 
-    CRAG -- "Irrelevant\nretries < 3" --> REWRITE[Rewrite Query\nSelf-RAG]
-    REWRITE -- "original route = vectorstore" --> RET
-    REWRITE -- "original route = web_search" --> WEB
+    CHK -- "Yes" --> GEN
+    CHK -- "No (retries < 3)" --> RWR[Rewrite Query]
+    CHK -- "No (retries ≥ 3)" --> WEB
 
-    CRAG -- "Irrelevant\nretries >= 3\nexhausted" --> WEB
+    WEB --> GEN
 
-    %% ── Post-Generation: grade_generation ───────────────────
-    GEN --> GRADE{grade_generation\nStep 6}
+    RWR -- "route = vectorstore" --> RET
+    RWR -- "route = web_search" --> WEB
 
-    GRADE -- "route = llm_direct\nOR retries >= 3\nno grading" --> CS[Update Semantic Cache]
+    GEN --> GRADE{grade_generation}
 
-    GRADE -- "Hallucination\ndetected\nre-generate" --> GEN
+    GRADE -- "llm_direct\nOR retries ≥ 3\nOR halluc_retries ≥ 3" --> CACHE_STORE
+    GRADE -- "route = web_search\nhallucination check\nbypassed → quality check only" --> QC{Answer\nUseful?}
+    GRADE -- "route = vectorstore\nhallucination check runs" --> HALL{Grounded\nin context?}
 
-    GRADE -- "No hallucination\nbut answer is off-topic\nrewrite query" --> REWRITE
+    HALL -- "Yes" --> QC
+    HALL -- "No (halluc_retries < 3)" --> REGEN[Regenerate\nbump halluc_retries]
+    REGEN --> GEN
 
-    GRADE -- "No hallucination\nHigh quality answer" --> CS
+    QC -- "Yes" --> CACHE_STORE
+    QC -- "No (retries < 3)" --> RWR
 
-    CS --> DONE
+    CACHE_STORE[Update Semantic Cache] --> DONE
 ```
 
 ## framework choice & why

@@ -12,4 +12,5 @@ class AgenticRAGState(TypedDict):
     needs_web_search: bool
     answer: str
     retries: int
+    hallucination_retries: int
     route: str
