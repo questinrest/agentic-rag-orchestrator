@@ -1,0 +1,89 @@
+,user_input,retrieved_contexts,response,faithfulness,answer_relevancy
+0,What are two specific complementary graphs constructured during the dual graph construction phase?,"['consistent representation.', '2.2.1 DUAL-GRAPH CONSTRUCTION FOR MULTIMODAL KNOWLEDGE While multimodal knowledge unification provides a uniform abstraction across modalities, directly constructing a single unified graph often risks overlooking modality-specific structural signals.', 'The proposed RAG-Anything addresses this challenge through a dual-graph construction strategy.', 'These complementary graphs are merged through entity', 'These complementary graphs are merged through entity alignment.', 'RAG-Anything leverages multimodal large language models to derive two complementary textual representations from each atomic content unit.', 'entities and their semantic relationships.', 'The resulting text-based knowledge graph captures explicit knowledge and semantic connections present in textual portions of documents, complementing the multimodal graph’s cross-modal grounding capabilities.', '2.2.2 GRAPH FUSION AND INDEX CREATION The separate cross-modal and text-based knowledge graphs capture complementary aspects of document semantics.', '• (i) Entity Alignment and Graph Fusion.', 'RAG-Anything introduces a comprehensive dual-graph construction strategy that preserves structural relationships across all modalities.', 'These findings confirm that our dual-graph construction and cross-modal hybrid retrieval mechanism is particularly effective for long-document reasoning tasks.', 'Given that our approach fundamentally differs from existing methods through dual-graph construction and hybrid retrieval, we specifically evaluated: i) Chunk-only, which bypasses graph construction entirely and relies solely on traditional chunk-based retrieval, and ii) w/o Reranker, which eliminates the cross-modal reranking component while preserving the core graph-based architecture.']","The context does not explicitly mention the names of the two specific complementary graphs constructed during the dual-graph construction phase. However, it can be inferred that the two graphs are:
+
+1. A multimodal graph (capturing cross-modal grounding capabilities)
+2. A text-based knowledge graph (capturing explicit knowledge and semantic connections present in textual portions of documents)
+
+These two graphs are merged through entity alignment, as mentioned in the context.",1.0,0.9794599536639398
+1,what are the two multimodal document question answering (DQA) benchmarks used to test the model performance?,"['current multimodal RAG systems.', 'It delivers superior performance particularly on long-context documents where relevant evidence spans multiple modalities and document sections.', 'Experimental Validation.', 'To validate the effectiveness of our proposed approach, we conduct comprehensive experiments on two challenging multimodal benchmarks: DocBench and MMLongBench.', 'Our evaluation demonstrates that RAG-Anything achieves superior performance across diverse domains.', 'Textual proxies enable efficient retrieval while authentic visual content provides rich semantics necessary for sophisticated reasoning during synthesis.', 'This unified conditioning enables sophisticated visual interpretation while maintaining grounding in retrieved evidence.', '3 EVALUATION 3.1 EXPERIMENTAL SETTINGS Evaluation Datasets.', 'We conduct comprehensive evaluations on two challenging multimodal Document Question Answering (DQA) benchmarks that reflect real-world complexity and diversity.', 'DocBench (Zou et al., 2024) provides a rigorous testbed with 229 multimodal documents spanning', 'Document Question Answering (DQA) benchmarks that reflect real-world complexity and diversity.', 'DocBench (Zou et al., 2024) provides a rigorous testbed with 229 multimodal documents spanning five critical domains: Academia, Finance, Government, Laws, and News.', 'The dataset includes 1,102 expert-crafted question-answer pairs.', 'MMLongBench (Ma et al., 2024) complements this evaluation by focusing specifically on longcontext multimodal document comprehension.', 'It features 135 documents across 7 diverse document types with 1,082 expert-annotated questions.', 'Together, these benchmarks provide comprehensive coverage of the multimodal document understanding challenges that RAG-Anything aims to address.', 'They ensure our evaluation captures both breadth across domains and depth in document complexity.', 'RAG-ANYTHING: ALL-IN-ONE RAG FRAMEWORK A APPENDIX This appendix provides comprehensive supporting materials for our experimental evaluation and implementation details.', 'Section A.1 presents detailed dataset statistics for the DocBench and MMLongBench multi-modal benchmarks, including document type distributions and complexity metrics.', 'Section A.2 showcases additional case studies that demonstrate RAG-Anything’s structureaware capabilities across diverse multimodal content understanding tasks.', 'Section A.3 documents the complete set of multimodal analysis prompts for vision, table, and equation processing that enable context-aware interpretation.', 'A.1 DATASET CHARACTERISTICS AND STATISTICS Table 5: Document type distribution and statistics for the DocBench benchmark.']","The two multimodal Document Question Answering (DQA) benchmarks used to test the model performance are:
+
+1. DocBench (Zou et al., 2024)
+2. MMLongBench (Ma et al., 2024)",1.0,1.0
+2,What is the current Delhi Temperature?,"[""[Web Search Results]: 17 hours ago -Current New Delhi weather condition is Mist with real-time temperature (31°C), humidity 29%, wind 7.6km/h, pressure (1005mb), UV (0), visibility (5km) in Delhi. January 23, 2026 -Today's weather will start off sunny in the morning with temperatures ranging from21.0°C to 34.0°C, and humidity levels between 48% and 98%. The skies will remain clear throughout the day. 2 weeks ago -© Copyright 2022, Develop by IT Team IMD, India Meteorological Department Ministry of Earth Sciences, New Delhi, India 1 week ago -CurrentForecasts · °C · Temperature Unit Selection · °Celsius · °Fahrenheit · New Delhi, DL, IN · Updated 11 minutes ago ·11°C· Fog · Feels 10 · H: 19° L: 9° · Full 72 hours · 7pm · 11° · Feels 10 · 0% 8pm · 11° · ... 1 week ago -Here is the seven-day weather ... ... Today's weather forecast in Delhi is Rain with thunderstorm.High 31°C, Low 20°C . Currently 25°C....""]",The current Delhi temperature is 31°C.,1.0,0.9846156558919132
+3,"Has the corresponding author of RAG-Anything, Chao Huang from the University of Hong Kong, announced any new multimodal framework updates or papers in the past week?","['[Web Search Results]: October 14, 2025 -From local to global: A graph rag approach to query-focused summarization. arXiv preprint arXiv:2404.16130, 2024. Guo et al. (2024) Zirui Guo, Lianghao Xia, Yanhua Yu, Tu Ao, and Chao Huang. Lightrag: Simple and fast retrieval-augmented generation. June 30, 2025 -[Introduction] Recently,the open - source project ""Integrated Multimodal RAG Framework"" RAG - Anything, released by the team of Professor Huang Chao from the University of Hong Kong, effectively solves the technical limitations of traditional ... December 8, 2025 -* Thrilled to announce VAMBA: a powerful hybrid Mamba-Transformer architecture designed specifically for hour-long video understanding tasks! VAMBA can receive more than 1000 frames on a single GPU card efficiently! * Why do we need hour-long video models? As videos become central in fields like surveillance, education (think lecture recordings!), sports analytics, podcasts, documentaries, and streaming platforms, current transformer-based multimodal models (LMMs) struggle—facing severe computational bottlenecks when processing long sequences. April 13, 2025 -Integrating Knowledge Retrieval with Generation: A Comprehensive Survey of RAG Models in NLP. (2025). Ghosal et al. (2023) Deepanway Ghosal, Navonil Majumder, Roy Ka-Wei Lee, Rada Mihalcea, and Soujanya Poria. 2023. Language Guided Visual Question Answering: Elevate Your Multimodal Language Model Using Knowledge-Enriched Prompts. arXiv preprint arXiv:2310.20159 (2023). Guo et al. (2024) Zirui Guo, Lianghao Xia, Yanhua Yu, Tu Ao, and Chao Huang. November 27, 2025 -Professor Chao Huang is an Assistant Professor and PhD supervisor at the Institute of Data Science and School of Computing and Data Science, HKU. His research focuses on Large Language Models (LLMs), AI agents, and Graph Machine Learning, with over 14,000 citations on Google Scholar. Professor Huang leads the Data Intelligence Lab at HKU, specializing in AI open-source technology research. The team has launched projects including LightRAG, RAG-Anything, DeepCode, AutoAgent, AI-Researcher, AI-Trader, MiniRAG, and VideoRAG, accumulating over 77,000 GitHub stars and ranking in the global Top-200, making it to GitHub Trending 59 times.', '[Web Search Results]: 23 Jul 2025·RAG-Anything enables advanced parsing and retrieval-augmented generation ... Chao Huang}, year={2024}, eprint={2410.05779}, archivePrefix={arXiv ...']","Based on the provided context, there is no information about new research papers, preprints, or updates on multimodal frameworks by Chao Huang or their research team within the last seven days. The context provides information about Chao Huang's work, such as the release of ""RAG-Anything"" and their research focus, but it does not include any updates from the last week. Therefore, the answer to the improved question is that there are no known new multimodal framework updates or papers from Chao Huang or their team within the specified time frame.",0.3333333333333333,0.8118396384552474
+4,Can you explain the general concept of 'Retrieval-Augmented Generation' and why it is necessary for LLM?,['LLM General Knowledge/No specific context found.'],"Retrieval-Augmented Generation (RAG) is a concept in natural language processing (NLP) that combines the strengths of retrieval-based and generation-based approaches to produce more accurate and informative text. It's particularly relevant for Large Language Models (LLMs).
+
+**Traditional Generation-Based Approach:**
+In a traditional generation-based approach, an LLM is trained to generate text based on a given prompt or input. The model relies on its internal knowledge and patterns learned during training to produce text. While this approach can generate coherent text, it has limitations:
+
+1. **Lack of external knowledge**: The model is limited to its training data and may not have access to the latest information or specific domain knowledge.
+2. **Hallucinations**: The model may generate text that is not based on actual facts or may ""hallucinate"" information that is not present in the training data.
+
+**Retrieval-Based Approach:**
+In contrast, a retrieval-based approach involves searching a large database or knowledge graph to retrieve relevant information related to the input prompt. This approach can provide more accurate and up-to-date information but has its own limitations:
+
+1. **Limited context understanding**: The retrieval system may not fully understand the context of the input prompt, leading to irrelevant or incomplete information.
+2. **Lack of coherence**: The retrieved information may not be coherent or well-structured, making it difficult to generate readable text.
+
+**Retrieval-Augmented Generation (RAG):**
+RAG combines the strengths of both approaches by using a retrieval system to fetch relevant information and then generating text based on that information. The process typically involves:
+
+1. **Retrieval**: A retrieval system searches a large database or knowledge graph to retrieve relevant information related to the input prompt.
+2. **Generation**: An LLM generates text based on the retrieved information, using its internal knowledge and patterns learned during training to produce coherent and readable text.
+
+**Why RAG is necessary for LLMs:**
+RAG is necessary for LLMs because it helps to:
+
+1. **Improve accuracy**: By retrieving relevant information, RAG can reduce the likelihood of hallucinations and provide more accurate text.
+2. **Increase informativeness**: RAG can provide more informative text by incorporating external knowledge and up-to-date information.
+3. **Enhance context understanding**: The combination of retrieval and generation allows for better context understanding, enabling the model to generate more relevant and coherent text.
+4. **Reduce overfitting**: RAG can help reduce overfitting by providing the model with a more diverse range of information and reducing its reliance on internal knowledge.
+
+In summary, Retrieval-Augmented Generation is a powerful approach that combines the strengths of retrieval-based and generation-based methods to produce more accurate, informative, and coherent text. It's essential for LLMs to leverage RAG to improve their performance and provide more reliable and trustworthy outputs.",0.0,0.7509948095825771
+5,"write a Python function using numpy to calculate the cosine similarity between two 1D array embeddings, which is a common metric used in semantic matching","['Our cross-modal hybrid retrieval mechanism strategically combines structural knowledge navigation with semantic similarity matching.', 'Equation Info Text Info ...', 'Semantic Similarity Matching Structural Knowledge Navigation Query High-/Low-level Keys Extraction Hybrid Retrieved Info ...', '• (ii) Semantic Similarity Matching.', '• (ii) Semantic Similarity Matching.', 'This mechanism addresses the challenge of identifying semantically relevant knowledge that lacks explicit structural connections.', 'To bridge this gap, we conduct dense vector similarity search between the query embedding eq and all components stored in embedding table T .', 'This approach encompasses atomic content chunks across all modalities, graph entities, and relationship representations, enabling fine-grained semantic matching that can surface relevant knowledge even when traditional lexical or structural signals are absent.', 'The learned embedding space captures nuanced semantic relationships and contextual similarities that complement the explicit structural', 'The learned embedding space captures nuanced semantic relationships and contextual similarities that complement the explicit structural signals from the navigation mechanism.', 'This retrieval pathway returns the top-k most semantically similar chunks Cseman(q) ranked by cosine similarity scores, ensuring comprehensive coverage of both structurally and semantically relevant knowledge.']","### Cosine Similarity Calculation using NumPy
+
+The cosine similarity is a measure of similarity between two non-zero vectors of an inner product space that measures the cosine of the angle between them. The cosine of 0° is 1, and it is less than 1 for any other angle.
+
+Here's a Python function that calculates the cosine similarity between two 1D array embeddings using NumPy:
+
+```python
+import numpy as np
+
+def calculate_cosine_similarity(embedding1: np.ndarray, embedding2: np.ndarray) -> float:
+    """"""
+    Calculate the cosine similarity between two 1D array embeddings.
+
+    Args:
+    - embedding1 (np.ndarray): The first embedding.
+    - embedding2 (np.ndarray): The second embedding.
+
+    Returns:
+    - float: The cosine similarity between the two embeddings.
+    """"""
+    # Calculate the dot product of the two embeddings
+    dot_product = np.dot(embedding1, embedding2)
+
+    # Calculate the L2 norm (magnitude) of each embedding
+    magnitude1 = np.linalg.norm(embedding1)
+    magnitude2 = np.linalg.norm(embedding2)
+
+    # Calculate the cosine similarity
+    cosine_similarity = dot_product / (magnitude1 * magnitude2)
+
+    return cosine_similarity
+
+# Example usage:
+if __name__ == ""__main__"":
+    # Define two example embeddings
+    embedding1 = np.array([1, 2, 3])
+    embedding2 = np.array([4, 5, 6])
+
+    # Calculate the cosine similarity
+    similarity = calculate_cosine_similarity(embedding1, embedding2)
+
+    print(""Cosine similarity:"", similarity)
+```
+
+This function takes two 1D NumPy arrays (`embedding1` and `embedding2`) as input and returns the cosine similarity between them as a float value. The cosine similarity is calculated using the dot product and the L2 norm (magnitude) of each embedding.
+
+Note that this function assumes that the input embeddings are non-zero vectors. If there's a possibility that the input embeddings might be zero vectors, you should add a check to handle this case and avoid division by zero.",0.25,0.887317356380721

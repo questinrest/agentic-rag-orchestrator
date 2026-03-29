@@ -164,7 +164,8 @@ def run_agentic_rag(query: str, namespace: str = "default_namespace") -> str:
     result = agentic_rag_app.invoke(initial_state)
     final_answer = result.get("answer", "I don't have enough information to answer that.")
     
-    # 3. Store in Semantic Cache if valid
+    # 3.Semantic Cache
+    
     if final_answer and final_answer != "I don't have enough information to answer that.":
         # We can extract sources from final_context_strips or just leave empty if it's direct LLM
         sources = result.get("final_context_strips", [])

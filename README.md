@@ -88,19 +88,33 @@ because i don't have access to an explicitly labeled ground-truth dataset, i bui
 
 i evaluated 3 distinct scenarios representing the pipeline's core branches:
 
-1. **vectorstore route**: *"Tell me about the cross-modal architecture of RAG-Anything."*
-   - **faithfulness**: `__` (highly grounded in the retrieved child chunks)
-   - **answer relevancy**: `__` (focused entirely on the architecture components)
+1. **vectorstore route**: 
+   - *"What are two specific complementary graphs constructured during the dual graph construction phase?"*
+     - **faithfulness**: `1.00`, **answer relevancy**: `0.98`
+   - *"what are the two multimodal document question answering (DQA) benchmarks used to test the model performance?"*
+     - **faithfulness**: `1.00`, **answer relevancy**: `1.00`
 
-2. **web search fallback**: *"Who won the latest Super Bowl?"*
-   - **faithfulness**: `__` (copied directly from duckduckgo snippet)
-   - **answer relevancy**: `__` (direct factual answer)
+2. **web search fallback**:
+   - *"What is the current Delhi Temperature?"*
+     - **faithfulness**: `1.00`, **answer relevancy**: `0.98`
+   - *"Has the corresponding author of RAG-Anything, Chao Huang from the University of Hong Kong, announced any new multimodal framework updates or papers in the past week?"*
+     - **faithfulness**: `0.33`, **answer relevancy**: `0.81`
 
-3. **direct llm route**: *"What is the capital of France?"*
-   - **faithfulness**: `__` (bypasses retrieval, relies on parametric knowledge)
-   - **answer relevancy**: `__` (direct factual answer)
+3. **direct llm route**: 
+   - *"Can you explain the general concept of 'Retrieval-Augmented Generation' and why it is necessary for LLM?"*
+     - **faithfulness**: `0.00`, **answer relevancy**: `0.75`
+   - *"write a Python function using numpy to calculate the cosine similarity between two 1D array embeddings, which is a common metric used in semantic matching"*
+     - **faithfulness**: `0.25`, **answer relevancy**: `0.89`
 
-> **note**: you can reproduce these metrics by running the `notebooks/ragas_evaluation.ipynb` file locally. it uses custom huggingface embeddings and groq to prevent api costs!
+> **note**: you can reproduce these metrics by running the `notebooks/ragas_evaluation.ipynb` file.
+
+## future improvements
+
+based on the evaluation results above, here are a few areas for future iteration:
+
+1. **web search depth**: while simple web queries perform perfectly (1.00 faithfulness), complex web searches (like tracking recent author publications) see a drop in faithfulness (0.33). upgrading from the basic duckduckgo snippet search to a deeper web scraper or a dedicated search api (e.g. tavily) could provide richer context.
+2. **evaluation metrics routing**: the `direct_llm` route naturally scores very low on *faithfulness* (0.00 - 0.25) because it bypasses the retriever and relies on parametric knowledge, resulting in an empty context array. the evaluation pipeline should be adjusted to use different metrics (like answer correctness) for non-retrieval routes to prevent skewed results.
+3. **advanced chunking**: explore adaptive or semantic chunking methods. although the parent-child chunking works exceptionally well for the vectorstore queries (1.00 faithfulness), semantic chunking could further optimize token usage and help pinpoint exact reasoning steps in dense research papers.
 
 ## Quick Start Demo
 

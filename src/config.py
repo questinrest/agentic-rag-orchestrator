@@ -58,9 +58,9 @@ CHILD_CHUNK_OVERLAP : int = int(os.getenv("CHILD_CHUNK_OVERLAP", 20))
 
 # LLM (Groq) default fallback for Generation
 GROQ_API_KEY : str = os.getenv("GROQ_API_KEY")
-OPENAI_MODEL_GROQ : str = os.getenv("OPENAI_MODEL_GROQ", "openai/gpt-oss-20b")
+OPENAI_MODEL_GROQ : str = os.getenv("OPENAI_MODEL_GROQ", "llama-3.3-70b-versatile")
 TEMPERATURE : float = float(os.getenv("TEMPERATURE", 0.2))
-MAX_TOKENS : int = int(os.getenv("MAX_TOKENS", 4096))
+MAX_TOKENS : int = int(os.getenv("MAX_TOKENS", 8192))
 
 # Adaptive RAG Router LLM
 ADAPTIVE_RAG_API_KEY : str = os.getenv("ADAPTIVE_RAG_API_KEY", GROQ_API_KEY)
